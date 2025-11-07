@@ -5,10 +5,6 @@ The projects demonstrate the complete workflow from data preparation to model de
 
 The objective of this repository is to showcase knowledge in supervised learning techniques, following best practices in code organization, documentation, and reproducibility for Data Science.
 
-## Featured Projects
-Multilinear_Regression
-- **ATP Tennis Performance Prediction** – Analyzes Association of Tennis Professionals (ATP) data to build and evaluate linear regression models for predicting players’ performance metrics, specifically the number of aces and match wins.
-
 ## Main Skills and Tools
 - Python (pandas, scikit-learn, matplotlib, seaborn)
 - Data cleaning and feature engineering
