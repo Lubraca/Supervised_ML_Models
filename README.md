@@ -13,7 +13,7 @@ The objective of this repository is to showcase knowledge in supervised learning
 - Jupyter Notebooks for exploratory data analysis
 - Git for version control
 ## Regressions
-  - Tennis Ace
+  - 
 
 ## Classifications
 - Loan Default Prediction
