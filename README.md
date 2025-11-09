@@ -12,6 +12,7 @@ The objective of this repository is to showcase knowledge in supervised learning
 - Statistical analysis and model evaluation
 - Jupyter Notebooks for exploratory data analysis
 - Git for version control
+
 ## Regressions
   - 
 
