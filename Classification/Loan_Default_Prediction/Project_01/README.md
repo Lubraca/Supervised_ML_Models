@@ -28,6 +28,6 @@ This project is developed using a remote connection:
 
 ## 💡 Next Steps (Current Branch: Feature_Load_EDA)
 The current focus is on **Data Acquisition and Enrichment**:
-1.  Load micro data (Kaggle) and macro data (BCB/Ipeadata).
-2.  Implement the **simulated date strategy** to link macro data to micro records.
-3.  Perform initial Data Cleaning and Exploratory Data Analysis (EDA).
+1.  Load micro data (Kaggle) and macro data (BCB). :white_check_mark:
+2.  Implement the **simulated date strategy** to link macro data to micro records. :white_check_mark:
+3.  Perform initial Data Cleaning and Exploratory Data Analysis (EDA). :on:
