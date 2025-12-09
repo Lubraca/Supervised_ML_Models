@@ -11,7 +11,7 @@ We aim to demonstrate that the combination of micro and macro features significa
 This project adheres to **MLOps best practices**, structured to separate training, serving, and artifacts:
 
 * `data/`: Stores raw and processed datasets (e.g., Kaggle files, BCB time series).
-* `notebooks/`: Jupyter Notebooks for analysis, modeling, and results (Blocks 1-19).
+* `notebooks/`: Jupyter Notebooks for analysis, modeling, and results (notebooks 01 to 06).
 * `src/`: **Production-ready Python modules** (`predict.py`, `schemas.py`) for the API.
 * `models/`: **MLOps Artifacts** (`.pkl` files: model, encoder map, imputation map).
 * `Dockerfile`: Defines the reproducible serving environment for the API.
