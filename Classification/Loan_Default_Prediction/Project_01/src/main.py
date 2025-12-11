@@ -3,6 +3,7 @@
 from fastapi import FastAPI, HTTPException
 import pandas as pd
 import os
+import sys
 
 # Define project Path in Colab
 PROJECT_BASE_PATH = '/content/drive/MyDrive/Project_01' 
@@ -15,15 +16,15 @@ if SRC_PATH not in sys.path:
     sys.path.insert(0, SRC_PATH)
     print("✅ Successfully added 'src' directory to Python path.")
 
+# Imports from your project directory:
 from config import Paths
+from src.predict import PredictionHandler
+from src.schemas import LoanApplicationRawInput, PredictionResponse
     
 cfg = Paths(PROJECT_BASE_PATH)
 cfg.create_dirs() 
 
-from src.predict import PredictionHandler
-from src.schemas import LoanApplicationRawInput, PredictionResponse
-
-# Define artifact paths (Ensure these match your Block 19/20 saving paths)
+# Define artifact paths 
 MODEL_PATH = os.path.join(cfg.MODEL_DIR, 'final_lgbm_optimized_model.pkl')
 MEANS_MAP_PATH = os.path.join(cfg.MODEL_DIR, 'imputation_means_map.pkl')
 ENCODER_PATH = os.path.join(cfg.MODEL_DIR, 'final_target_encoder.pkl')
@@ -31,14 +32,13 @@ ENCODER_PATH = os.path.join(cfg.MODEL_DIR, 'final_target_encoder.pkl')
 # --- APPLICATION LIFECYCLE: Load Model ONCE ---
 
 # Initialize the Prediction Handler globally when the API server starts
-# NOTE: You must replace the mock class below with your actual PredictionHandler
-class MockPredictionHandler:
-    def __init__(self, *args, **kwargs):
-        print("MOCK Handler: Initializing and loading models...")
-    def predict_proba(self, raw_data_dict):
-        # MOCK LOGIC: Returns a random but plausible probability for testing
-        return 0.15 
-prediction_handler = MockPredictionHandler(MODEL_PATH, MEANS_MAP_PATH, ENCODER_PATH)
+prediction_handler = None
+try:
+    prediction_handler = PredictionHandler(MODEL_PATH, MEANS_MAP_PATH, ENCODER_PATH)
+    print("✅ PredictionHandler initialized successfully.")
+    
+except Exception as e:
+    print(f"❌ CRITICAL ERROR: Failed to load model artifacts: {e}")
 
 
 # --- FastAPI App Setup ---
@@ -50,9 +50,12 @@ app = FastAPI(
 
 @app.get("/health")
 def health_check():
-    """Simple health check endpoint to confirm the service is running."""
-    # In a real app, you'd check if prediction_handler.model is not None
-    return {"status": "ok", "model_ready": True} 
+    """Simple health check endpoint to confirm the service is running and model is loaded."""
+    if prediction_handler and hasattr(prediction_handler, 'model') and prediction_handler.model:
+        return {"status": "ok", "model_ready": True}
+    else:
+        # 503 Service Unavailable if the model failed to load at startup
+        raise HTTPException(status_code=503, detail="Service Unavailable: Model or Artifacts failed to load.")
 
 
 @app.post("/predict", response_model=PredictionResponse)
@@ -61,13 +64,14 @@ def predict_loan_default(raw_input: LoanApplicationRawInput):
     Receives raw customer data, preprocesses it using saved artifacts, 
     and returns the probability of default.
     """
-    
+    if not prediction_handler or not hasattr(prediction_handler, 'model') or not prediction_handler.model:
+        raise HTTPException(status_code=503, detail="Prediction service not initialized. Check server logs.")
+
     # 1. Convert Pydantic model data to a simple dictionary
-    # FastAPI/Pydantic ensures the raw_input data is valid and correctly typed
     raw_data_dict = raw_input.model_dump() 
     
     # 2. Get the ID before processing
-    sk_id = raw_data_dict.pop('SK_ID_CURR') # Pop ID, as it's not a feature
+    sk_id = raw_data_dict.pop('SK_ID_CURR') 
 
     try:
         # 3. Use the PredictionHandler to get the score
@@ -75,7 +79,7 @@ def predict_loan_default(raw_input: LoanApplicationRawInput):
         
     except Exception as e:
         # Catch any errors in feature engineering or prediction
-        print(f"Prediction Error: {e}")
+        print(f"Prediction Error for SK_ID {sk_id}: {e}")
         raise HTTPException(status_code=500, detail="Internal prediction failure.")
 
     # 4. Return the structured response
