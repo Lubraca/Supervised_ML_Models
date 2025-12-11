@@ -4,16 +4,24 @@ from fastapi import FastAPI, HTTPException
 import pandas as pd
 import os
 
-# Assuming you have a config module or paths defined globally
-# from config import cfg 
-# from src.predict import PredictionHandler
-# from src.schemas import LoanApplicationRawInput, PredictionResponse
+# Define project Path in Colab
+PROJECT_BASE_PATH = '/content/drive/MyDrive/Project_01' 
 
+# ADD 'src' DIRECTORY TO PYTHON PATH
+SRC_PATH = os.path.join(PROJECT_BASE_PATH, 'src')
 
-# --- MOCK CONFIGURATION (Replace with your actual config paths) ---
-class MockConfig:
-    MODEL_DIR = './models' 
-cfg = MockConfig()
+# verify if SRC_PATH is already in sys.path
+if SRC_PATH not in sys.path:
+    sys.path.insert(0, SRC_PATH)
+    print("✅ Successfully added 'src' directory to Python path.")
+
+from config import Paths
+    
+cfg = Paths(PROJECT_BASE_PATH)
+cfg.create_dirs() 
+
+from src.predict import PredictionHandler
+from src.schemas import LoanApplicationRawInput, PredictionResponse
 
 # Define artifact paths (Ensure these match your Block 19/20 saving paths)
 MODEL_PATH = os.path.join(cfg.MODEL_DIR, 'final_lgbm_optimized_model.pkl')

@@ -2,14 +2,19 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 
 class LoanApplicationRawInput(BaseModel):
-    SK_ID_CURR: <class 'int'> = annotation=NoneType required=True description='Unique ID of the application (MANDATORY).'
-    NAME_CONTRACT_TYPE: Optional[str] = None
-    CODE_GENDER: Optional[str] = None
+    # --- MANDATORY CORE FEATURES (6 Total) ---
+    # These MUST be present in the JSON payload
+    SK_ID_CURR: int = Field(..., description='Unique ID of the application (MANDATORY).')
+    NAME_CONTRACT_TYPE: str = Field(..., description='MANDATORY core feature: Type of loan.')
+    CODE_GENDER: str = Field(..., description='MANDATORY core feature: Gender of the applicant.')
+    AMT_INCOME_TOTAL: float = Field(..., description='MANDATORY core feature: Applicant\'s income.')
+    AMT_CREDIT: float = Field(..., description='MANDATORY core feature: Loan amount.')
+    DAYS_BIRTH: int = Field(..., description='MANDATORY core feature: Applicant\'s age (Days since birth).')
+    
+    # --- OPTIONAL FEATURES (Imputed by PredictionHandler) ---
     FLAG_OWN_CAR: Optional[str] = None
     FLAG_OWN_REALTY: Optional[str] = None
     CNT_CHILDREN: Optional[int] = None
-    AMT_INCOME_TOTAL: Optional[float] = None
-    AMT_CREDIT: Optional[float] = None
     AMT_ANNUITY: Optional[float] = None
     AMT_GOODS_PRICE: Optional[float] = None
     NAME_TYPE_SUITE: Optional[str] = None
@@ -18,7 +23,6 @@ class LoanApplicationRawInput(BaseModel):
     NAME_FAMILY_STATUS: Optional[str] = None
     NAME_HOUSING_TYPE: Optional[str] = None
     REGION_POPULATION_RELATIVE: Optional[float] = None
-    DAYS_BIRTH: Optional[int] = None
     DAYS_EMPLOYED: Optional[int] = None
     DAYS_REGISTRATION: Optional[float] = None
     DAYS_ID_PUBLISH: Optional[int] = None
