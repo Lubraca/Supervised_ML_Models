@@ -24,6 +24,8 @@ class Paths:
         self.MODEL_DIR = os.path.join(self.PROJECT_BASE_PATH, 'models') # For saving trained models (e.g., model.pkl)
         self.REPORT_DIR = os.path.join(self.PROJECT_BASE_PATH, 'reports') # For EDA plots, performance metrics, etc.
         self.SUBMISSION_DIR = os.path.join(self.PROJECT_BASE_PATH, 'submissions') # For predicted results
+        self.SRC_DIR = os.path.join(self.PROJECT_BASE_PATH, 'src') # source python scripts
+
         # --- File Paths ---
         
         # Raw Data (Input)
@@ -38,7 +40,7 @@ class Paths:
 
     def create_dirs(self):
         """Creates all necessary directories if they don't exist."""
-        for path in [self.DATA_RAW_DIR, self.DATA_PROCESSED_DIR, self.MODEL_DIR, self.REPORT_DIR, self.SUBMISSION_DIR]:
+        for path in [self.DATA_RAW_DIR, self.DATA_PROCESSED_DIR, self.MODEL_DIR, self.REPORT_DIR, self.SUBMISSION_DIR, self.SRC_DIR] :
             if not os.path.exists(path):
                 os.makedirs(path)
                 print(f"Created directory: {path}")
