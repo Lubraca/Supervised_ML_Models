@@ -1,101 +1,98 @@
-# FILE: src/main.py
-
 from fastapi import FastAPI, HTTPException
-import pandas as pd
 import os
-import sys
 
-# -----------------------------------------
-# Resolve project root dynamically
-# -----------------------------------------
-PROJECT_BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# Add 'src' directory to Python path
-SRC_PATH = os.path.join(PROJECT_BASE_PATH, "src")
-if SRC_PATH not in sys.path:
-    sys.path.insert(0, SRC_PATH)
-    print("✅ Successfully added 'src' directory to Python path.")
-
-# -----------------------------------------
-# Imports from project modules
-# -----------------------------------------
 from src.predict import PredictionHandler
 from src.schemas import LoanApplicationRawInput, PredictionResponse
 
-# -----------------------------------------
-# Paths to model artifacts
-# -----------------------------------------
-MODEL_DIR = os.path.join(PROJECT_BASE_PATH, "models")
+# =====================================================
+# PATH CONFIG (DOCKER / PRODUCTION)
+# =====================================================
 
-MODEL_PATH = os.path.join(MODEL_DIR, "final_lgbm_model.pkl")
-IMPUTATION_PATH = os.path.join(MODEL_DIR, "final_imputation_map.json")
+# Base path inside the container (override via env if needed)
+BASE_DIR = os.getenv("PROJECT_BASE_PATH", "/app")
+
+# Directory where the serialized artifacts live
+MODEL_DIR = os.path.join(BASE_DIR, "models")
+
+# Artifact file paths
+MODEL_PATH = os.path.join(MODEL_DIR, "final_lgbm_optimized_model.pkl")
+MEANS_MAP_PATH = os.path.join(MODEL_DIR, "imputation_means_map.pkl")
 ENCODER_PATH = os.path.join(MODEL_DIR, "final_target_encoder.pkl")
-FEATURES_PATH = os.path.join(MODEL_DIR, "FINAL_MODEL_FEATURES.json")
 
-# -----------------------------------------
-# Load Prediction Handler ONCE at startup
-# -----------------------------------------
+# =====================================================
+# MODEL INITIALIZATION (LOAD ONCE)
+# =====================================================
+
 prediction_handler = None
+
 try:
     prediction_handler = PredictionHandler(
         model_path=MODEL_PATH,
-        imputation_path=IMPUTATION_PATH,
-        encoder_path=ENCODER_PATH,
-        features_path=FEATURES_PATH
+        mean_map_path=MEANS_MAP_PATH,
+        encoder_path=ENCODER_PATH
     )
-    print("✅ PredictionHandler initialized successfully.")
-
+    print("✅ PredictionHandler loaded successfully.")
 except Exception as e:
-    print(f"❌ CRITICAL ERROR: Failed to load model artifacts: {e}")
+    # Keep the API up, but mark the service as unavailable via /health
+    print(f"❌ CRITICAL ERROR while loading artifacts: {e}")
 
-# -----------------------------------------
-# FastAPI Setup
-# -----------------------------------------
+# =====================================================
+# FASTAPI APP
+# =====================================================
+
 app = FastAPI(
-    title="Home Credit Default Risk Predictor",
-    description="Predicts the probability of loan default (TARGET=1) using the final LightGBM model.",
+    title="Home Credit Default Risk API",
+    description="Predicts the probability of loan default using LightGBM.",
     version="1.0.0"
 )
 
-# -----------------------------------------
-# Healthcheck Endpoint
-# -----------------------------------------
+# =====================================================
+# ENDPOINTS
+# =====================================================
+
 @app.get("/health")
 def health_check():
-    if prediction_handler and hasattr(prediction_handler, "model") and prediction_handler.model:
-        return {"status": "ok", "model_ready": True}
-    else:
+    """
+    Health endpoint to confirm the service is running and the model is loaded.
+    """
+    if prediction_handler and getattr(prediction_handler, "model", None):
+        return {"status": "ok", "model_loaded": True}
+
+    raise HTTPException(
+        status_code=503,
+        detail="Service Unavailable: model/artifacts failed to load."
+    )
+
+
+@app.post("/predict", response_model=PredictionResponse)
+def predict_loan_default(payload: LoanApplicationRawInput):
+    """
+    Receives raw customer data and returns the probability of default.
+    """
+    if not prediction_handler or not getattr(prediction_handler, "model", None):
         raise HTTPException(
             status_code=503,
-            detail="Service Unavailable: Model or artifacts failed to load."
+            detail="Prediction service not initialized. Check server logs."
         )
 
-# -----------------------------------------
-# Prediction Endpoint
-# -----------------------------------------
-@app.post("/predict", response_model=PredictionResponse)
-def predict_loan_default(raw_input: LoanApplicationRawInput):
-    """
-    Receives raw loan application data, preprocesses according to model pipeline,
-    and returns default probability.
-    """
+    # Convert the Pydantic payload to a plain dict
+    data = payload.model_dump()
 
-    if not prediction_handler or not hasattr(prediction_handler, "model") or not prediction_handler.model:
-        raise HTTPException(status_code=503, detail="Prediction service not initialized.")
-
-    # Convert input to dict
-    raw_data = raw_input.model_dump()
-
-    # Extract SK_ID before preprocessing
-    sk_id = raw_data.pop("SK_ID_CURR")
+    # Extract the identifier (not used as a model feature)
+    sk_id = data.pop("SK_ID_CURR")
 
     try:
-        probability = prediction_handler.predict_proba(raw_data)
-
+        # Run preprocessing + model inference
+        probability = prediction_handler.predict_proba(data)
     except Exception as e:
-        print(f"Prediction Error for SK_ID {sk_id}: {e}")
-        raise HTTPException(status_code=500, detail="Internal prediction failure.")
+        # Log the root cause server-side, return a safe API error to the client
+        print(f"❌ Prediction error for SK_ID_CURR={sk_id}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Internal prediction failure."
+        )
 
+    # Return a structured response
     return PredictionResponse(
         SK_ID_CURR=sk_id,
         probability_of_default=probability
