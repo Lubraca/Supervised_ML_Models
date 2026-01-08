@@ -1,57 +1,153 @@
-# 🇧🇷 Macro-Enhanced Credit Default Risk Model
+# 🇧🇷 Macro-Enhanced Credit Default Risk Model  
+### An MLOps Learning Project
+
+This repository documents an **end-to-end Machine Learning & MLOps learning project**, focused on building, evaluating, and deploying a **credit default risk model** while rigorously testing the hypothesis that **macroeconomic features improve predictive performance**.
+
+The project prioritizes **methodological rigor, reproducibility, and production-oriented thinking**, even when experimental results do **not** confirm the initial hypothesis.
+
+---
 
 ## 🎯 Project Goal
-To build a highly predictive credit risk scoring model for consumer loans by augmenting a client-level (micro) dataset with key Brazilian macroeconomic indicators (macro).
 
-We aim to demonstrate that the combination of micro and macro features significantly improves the model's ability to predict default (measured by AUC/ROC).
+To evaluate whether augmenting a **client-level (micro) credit dataset** with **Brazilian macroeconomic indicators** improves the predictive performance of a loan default model.
 
-***
+**Initial hypothesis**:  
+> The combination of micro-level borrower data and macroeconomic indicators (e.g., inflation, interest rates) improves AUC/ROC performance.
 
-## 🚀 Repository Structure (MLOps Focus)
-This project adheres to **MLOps best practices**, structured to separate training, serving, and artifacts:
+**Final conclusion**:  
+> After systematic experimentation and feature selection, **macroeconomic variables did not improve the model’s predictive power**.  
+> The final optimized model relies exclusively on **micro-level features**.
 
-* `data/`: Stores raw and processed datasets (e.g., Kaggle files, BCB time series).
-* `notebooks/`: Jupyter Notebooks for analysis, modeling, and results (notebooks 01 to 06).
-* `src/`: **Production-ready Python modules** (`predict.py`, `schemas.py`) for the API.
-* `models/`: **MLOps Artifacts** (`.pkl` files: model, encoder map, imputation map).
-* `Dockerfile`: Defines the reproducible serving environment for the API.
-* `PLANNING.md`: Detailed execution plan for project phases.
-* `README.md`: This project overview.
+This outcome is explicitly documented as part of the learning process.
 
-***
+---
+
+## 🧪 Experimental Outcome (Key Insight)
+
+- Macroeconomic variables were engineered, lagged, and tested
+- Multiple model configurations were evaluated
+- Feature importance analysis and validation metrics showed **no statistically or practically meaningful performance gain**
+- The final model contains **12 features**, **none of which are macroeconomic**
+
+This reinforces an important real-world lesson:  
+**Not all theoretically relevant features add predictive signal in practice**.
+
+---
+
+## 🚀 Repository Structure (MLOps-Oriented)
+
+This project follows **MLOps best practices**, clearly separating experimentation, training artifacts, and serving logic:
+
+project-root/
+│
+├── data/ # Raw and processed datasets (Kaggle + BCB time series)
+├── notebooks/ # Exploratory analysis and modeling notebooks (01 → 06)
+├── src/ # Production-ready Python modules
+│ ├── predict.py # Inference pipeline (PredictionHandler)
+│ └── schemas.py # Pydantic input/output schemas
+│
+├── models/ # MLOps artifacts
+│ ├── model.pkl
+│ ├── target_encoder.pkl
+│ └── imputation_map.json
+│
+├── Dockerfile # Reproducible serving environment
+├── PLANNING.md # Execution plan and project phases
+├── README.md # Project overview
+
+
+---
 
 ## 📊 Modeling & Feature Engineering Highlights
 
-To handle the high dimensionality and feature types of the dataset, the following techniques were crucial:
+To handle a high-dimensional credit dataset, the following techniques were applied:
 
-* **Feature Engineering:** Calculated key financial ratios ($\frac{\text{Credit}}{\text{Income}}$, $\frac{\text{Annuity}}{\text{Income}}$) and fixed critical data anomalies (e.g., `DAYS_EMPLOYED`).
-* **Dimensionality Reduction:** Instead of high-cardinality One-Hot Encoding, **Target Encoding** was used on categorical features. This greatly improved model performance and reduced the feature count.
-* **Final Model:** **LightGBM** (`lgbm.LGBMClassifier`) was chosen for its speed and superior performance on tree-based problems, trained with optimized hyperparameters.
+### Feature Engineering
+- Financial ratios such as:
+  - Credit / Income
+  - Annuity / Income
+- Correction of known data anomalies (e.g., `DAYS_EMPLOYED` sentinel values)
 
-***
+### Categorical Encoding
+- **Target Encoding** was used instead of One-Hot Encoding
+- Reduced dimensionality dramatically
+- Improved stability and performance of tree-based models
+
+### Model Choice
+- **LightGBM (`LGBMClassifier`)**
+- Selected for:
+  - Strong performance on tabular data
+  - Fast training
+  - Compatibility with production inference pipelines
+
+---
+
+## 🧠 Final Model Summary
+
+- **Problem type**: Binary classification (default vs. non-default)
+- **Metric focus**: ROC-AUC
+- **Final feature count**: 12
+- **Macroeconomic features used**: ❌ None
+- **Reason**: No demonstrated predictive gain
+
+This decision reflects **evidence-based feature selection**, not theoretical preference.
+
+---
 
 ## 🌐 MLOps Deployment Pipeline (FastAPI & Docker)
 
-The final optimized model is deployed as a resilient, containerized microservice. 
+The final model is deployed as a **production-style microservice**, emphasizing training–serving parity.
 
-| Component | Technology | Role in Pipeline |
-| :--- | :--- | :--- |
-| **Prediction Service** | **FastAPI** | Exposes a low-latency `/predict` endpoint that accepts raw client data (Pydantic validation). |
-| **Serving Environment** | **Docker** | Packages the entire application (`src/`, dependencies, and the `models/` artifacts) into a single, reproducible image. |
-| **Prediction Logic** | **PredictionHandler** | Python class that loads the saved LightGBM model, the **Imputation Map**, and the **Target Encoder**. It applies all preprocessing steps consistently to live raw input data. |
+| Component | Technology | Role |
+|--------|------------|------|
+| API Layer | FastAPI | Exposes `/predict` endpoint with schema validation |
+| Inference Logic | PredictionHandler | Applies preprocessing, encoding, and prediction consistently |
+| Artifacts | joblib / JSON | Model, encoder, and imputation maps |
+| Runtime | Docker | Reproducible, containerized serving environment |
 
-***
+---
 
-## 🛠️ Environment Setup (VS Code + Colab VM)
-This project is developed using a remote connection:
-1.  **VS Code Remote Development** via the Microsoft Tunnel extension.
-2.  **Google Colab VM** as the primary compute environment.
-3.  **GitHub** for version control, secured via a Personal Access Token (PAT).
+## 🛠️ Development Environment
 
-***
+This project was developed using a **remote-first workflow**:
 
-## 💡 Next Steps (Current Branch: Deployment)
-The current focus is on **Finalizing MLOps Deployment**:
-1.  Verify MLOps artifacts: Model, Imputation Map, and Target Encoder are saved. ✅
-2.  Finalize the **PredictionHandler** class and implement the **FastAPI** service locally. ⏳
-3.  Create and test the **Dockerfile** for containerization.
+1. **VS Code Remote Development**
+2. **Google Colab VM** as the main compute environment
+3. **GitHub** for version control (PAT-based authentication)
+
+This setup mirrors real-world constraints where training and serving often occur on different machines.
+
+---
+
+## 💡 Learning Outcomes
+
+This project demonstrates:
+
+- How to test and **reject a hypothesis responsibly**
+- The importance of **training–serving parity**
+- Proper management of **ML artifacts**
+- Clean separation between experimentation and production code
+- How MLOps adds value even when model performance plateaus
+
+---
+
+## 🔜 Next Steps (Deployment Track)
+
+Current focus: **MLOps completion**, not model tuning.
+
+- [x] Save final model and preprocessing artifacts
+- [x] Implement PredictionHandler
+- [ ] Finalize and test Dockerfile
+- [ ] Run containerized API locally
+- [ ] (Optional) Add CI/CD and monitoring
+
+---
+
+## 👤 Author
+
+**Lucas Casarin**  
+Economist | Machine Learning | MLOps-Oriented Analytics Engineering  
+
+This repository is part of my professional portfolio and reflects **realistic ML system development**, including failed hypotheses, engineering trade-offs, and production concerns.
+
+
