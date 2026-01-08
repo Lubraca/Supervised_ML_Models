@@ -25,7 +25,7 @@ This project adheres to **MLOps best practices**, structured to separate trainin
 To handle the high dimensionality and feature types of the dataset, the following techniques were crucial:
 
 * **Feature Engineering:** Calculated key financial ratios ($\frac{\text{Credit}}{\text{Income}}$, $\frac{\text{Annuity}}{\text{Income}}$) and fixed critical data anomalies (e.g., `DAYS_EMPLOYED`).
-* **Dimensionality Reduction:** Instead of high-cardinality One-Hot Encoding, **Target Encoding** was used on categorical features. This greatly improved model performance and reduced the feature count, resulting in $\approx 250+$ features.
+* **Dimensionality Reduction:** Instead of high-cardinality One-Hot Encoding, **Target Encoding** was used on categorical features. This greatly improved model performance and reduced the feature count.
 * **Final Model:** **LightGBM** (`lgbm.LGBMClassifier`) was chosen for its speed and superior performance on tree-based problems, trained with optimized hyperparameters.
 
 ***
