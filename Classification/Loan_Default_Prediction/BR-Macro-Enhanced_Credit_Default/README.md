@@ -39,21 +39,21 @@ This reinforces an important real-world lesson:
 This project follows **MLOps best practices**, clearly separating experimentation, training artifacts, and serving logic:
 
 project-root/
-│
-├── data/ # Raw and processed datasets (Kaggle + BCB time series)
-├── notebooks/ # Exploratory analysis and modeling notebooks (01 → 06)
-├── src/ # Production-ready Python modules
-│ ├── predict.py # Inference pipeline (PredictionHandler)
-│ └── schemas.py # Pydantic input/output schemas
-│
-├── models/ # MLOps artifacts
-│ ├── model.pkl
-│ ├── target_encoder.pkl
-│ └── imputation_map.json
-│
-├── Dockerfile # Reproducible serving environment
-├── PLANNING.md # Execution plan and project phases
-├── README.md # Project overview
+│/
+├── data/ # Raw and processed datasets (Kaggle + BCB time series)/
+├── notebooks/ # Exploratory analysis and modeling notebooks (01 → 06)/
+├── src/ # Production-ready Python modules/
+│ ├── predict.py # Inference pipeline (PredictionHandler)/
+│ └── schemas.py # Pydantic input/output schemas/
+│/
+├── models/ # MLOps artifacts/
+│ ├── model.pkl/
+│ ├── target_encoder.pkl/
+│ └── imputation_map.json/
+│/
+├── Dockerfile # Reproducible serving environment/
+├── PLANNING.md # Execution plan and project phases/
+├── README.md # Project overview/
 
 
 ---
