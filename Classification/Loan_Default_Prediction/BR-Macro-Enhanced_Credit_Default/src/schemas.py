@@ -2,16 +2,26 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 
 class LoanApplicationRawInput(BaseModel):
-    # --- MANDATORY CORE FEATURES (6 Total) ---
+    # --- MANDATORY FEATURES ---
     # These MUST be present in the JSON payload
-    SK_ID_CURR: int = Field(..., description='Unique ID of the application (MANDATORY).')
-    NAME_CONTRACT_TYPE: str = Field(..., description='MANDATORY core feature: Type of loan.')
-    CODE_GENDER: str = Field(..., description='MANDATORY core feature: Gender of the applicant.')
-    AMT_INCOME_TOTAL: float = Field(..., description='MANDATORY core feature: Applicant\'s income.')
-    AMT_CREDIT: float = Field(..., description='MANDATORY core feature: Loan amount.')
-    DAYS_BIRTH: int = Field(..., description='MANDATORY core feature: Applicant\'s age (Days since birth).')
+    PAYMENT_RATE: float = Field(..., description='MANDATORY feature: Payment rate.')
+    EXT_SOURCE_1: float = Field(..., description='MANDATORY feature: External source 1.')
+    EXT_SOURCE_3: float = Field(..., description='MANDATORY feature: External source 3.')
+    EXT_SOURCE_2: float = Field(..., description='MANDATORY feature: External source 2.')
+    DAYS_BIRTH: int = Field(..., description='MANDATORY feature: Applicant\'s age (Days since birth).')
+    DAYS_ID_PUBLISH: int = Field(..., description='MANDATORY feature: Days since ID publish.')
+    DAYS_REGISTRATION: float = Field(..., description='MANDATORY feature: Days since registration.')
+    DAYS_EMPLOYED: int = Field(..., description='MANDATORY feature: Days employed.')
+    DAYS_LAST_PHONE_CHANGE: float = Field(..., description='MANDATORY feature: Days since last phone change.')
+    ORGANIZATION_TYPE: str = Field(..., description='MANDATORY feature: Organization type (raw).')
+    ANNUITY_INCOME_RATIO: float = Field(..., description='MANDATORY feature: Annuity to income ratio.')
+    AMT_CREDIT: float = Field(..., description='MANDATORY feature: Loan amount.')
     
     # --- OPTIONAL FEATURES (Imputed by PredictionHandler) ---
+    SK_ID_CURR: Optional[int] = None
+    NAME_CONTRACT_TYPE: Optional[str] = None
+    CODE_GENDER: Optional[str] = None
+    AMT_INCOME_TOTAL: Optional[float] = None
     FLAG_OWN_CAR: Optional[str] = None
     FLAG_OWN_REALTY: Optional[str] = None
     CNT_CHILDREN: Optional[int] = None
@@ -23,9 +33,6 @@ class LoanApplicationRawInput(BaseModel):
     NAME_FAMILY_STATUS: Optional[str] = None
     NAME_HOUSING_TYPE: Optional[str] = None
     REGION_POPULATION_RELATIVE: Optional[float] = None
-    DAYS_EMPLOYED: Optional[int] = None
-    DAYS_REGISTRATION: Optional[float] = None
-    DAYS_ID_PUBLISH: Optional[int] = None
     OWN_CAR_AGE: Optional[float] = None
     FLAG_MOBIL: Optional[int] = None
     FLAG_EMP_PHONE: Optional[int] = None
@@ -45,10 +52,6 @@ class LoanApplicationRawInput(BaseModel):
     REG_CITY_NOT_LIVE_CITY: Optional[int] = None
     REG_CITY_NOT_WORK_CITY: Optional[int] = None
     LIVE_CITY_NOT_WORK_CITY: Optional[int] = None
-    ORGANIZATION_TYPE: Optional[str] = None
-    EXT_SOURCE_1: Optional[float] = None
-    EXT_SOURCE_2: Optional[float] = None
-    EXT_SOURCE_3: Optional[float] = None
     APARTMENTS_AVG: Optional[float] = None
     BASEMENTAREA_AVG: Optional[float] = None
     YEARS_BEGINEXPLUATATION_AVG: Optional[float] = None
@@ -100,7 +103,6 @@ class LoanApplicationRawInput(BaseModel):
     DEF_30_CNT_SOCIAL_CIRCLE: Optional[float] = None
     OBS_60_CNT_SOCIAL_CIRCLE: Optional[float] = None
     DEF_60_CNT_SOCIAL_CIRCLE: Optional[float] = None
-    DAYS_LAST_PHONE_CHANGE: Optional[float] = None
     FLAG_DOCUMENT_2: Optional[int] = None
     FLAG_DOCUMENT_3: Optional[int] = None
     FLAG_DOCUMENT_4: Optional[int] = None
@@ -138,8 +140,6 @@ class LoanApplicationRawInput(BaseModel):
     MONTH_OF_YEAR: Optional[int] = None
     YEAR: Optional[int] = None
     CREDIT_INCOME_RATIO: Optional[float] = None
-    ANNUITY_INCOME_RATIO: Optional[float] = None
-    PAYMENT_RATE: Optional[float] = None
 
 class PredictionResponse(BaseModel):
     SK_ID_CURR: int
