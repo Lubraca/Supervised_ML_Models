@@ -1,0 +1,13 @@
+﻿version: "3.9"
+
+services:
+  credit-risk-api:
+    build: .
+    container_name: credit-risk-api
+    ports:
+      - "8000:8000"
+    environment:
+      PROJECT_BASE_PATH: /app
+    volumes:
+      - ./models:/app/models:ro
+    restart: unless-stopped

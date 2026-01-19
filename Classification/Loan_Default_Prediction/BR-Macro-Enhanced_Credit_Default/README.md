@@ -139,8 +139,8 @@ Current focus: **MLOps completion**, not model tuning.
 
 - [x] Save final model and preprocessing artifacts
 - [x] Implement PredictionHandler
-- [ ] Finalize and test Dockerfile
-- [ ] Run containerized API locally
+- [x] Finalize and test Dockerfile
+- [x] Run containerized API locally
 - [ ] (Optional) Add CI/CD and monitoring
 
 ---
