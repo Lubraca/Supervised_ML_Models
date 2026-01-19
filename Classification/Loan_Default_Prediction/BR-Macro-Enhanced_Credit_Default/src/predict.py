@@ -102,15 +102,22 @@ class PredictionHandler:
         # If encoder stores .cols (categorical columns)
         if hasattr(self.target_encoder, "cols"):
             cat_cols = [c for c in self.target_encoder.cols if c in df.columns]
+            if not cat_cols:
+                return df
 
             df_cat = df[cat_cols].copy()
             df_num = df.drop(columns=cat_cols, errors="ignore")
 
             df_cat_enc = self.target_encoder.transform(df_cat)
+            # Match training-time naming: <col>_TARGET_ENC
+            df_cat_enc.columns = [f"{c}_TARGET_ENC" for c in df_cat_enc.columns]
+            df_num = df_num.drop(columns=df_cat_enc.columns, errors="ignore")
             df = pd.concat([df_num, df_cat_enc], axis=1)
         else:
             # generic fallback
             df = self.target_encoder.transform(df)
+            if isinstance(df, pd.DataFrame):
+                df.columns = [f"{c}_TARGET_ENC" for c in df.columns]
 
         return df
 
