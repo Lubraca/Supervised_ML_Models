@@ -46,6 +46,8 @@ project-root/
 ├── src/                 # Production-ready Python modules
 │   ├── predict.py       # Inference pipeline (PredictionHandler)
 │   └── schemas.py       # Pydantic input/output schemas
+│   ├── dev_main.py      
+│   └── config.py        
 │
 ├── models/              # MLOps artifacts
 │   ├── model.pkl
